@@ -17,12 +17,22 @@
 
 <style scoped>
     .foot {
-        /*border: 1px solid yellow;*/
         display: flex;
         flex: 1 1 auto;
         width: 100%;
-        padding: 1rem 0rem;
         justify-content: space-around;
         align-items: center;
+    }
+    .foot-bg {
+        background-image: url("../../assets/tip_block.png");
+        background-repeat: no-repeat;
+        background-size: cover;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem 2rem 1rem 2rem;
+        flex: 1 1 50%;
+        margin: 0px 1rem;
     }
 </style>

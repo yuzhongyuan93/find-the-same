@@ -1,5 +1,5 @@
 <template>
-    <section class="already">
+    <section class="head-bg">
         <p class="title">Total Pairs</p>
         <p class="content">{{ total/2 }}</p>
     </section>
@@ -17,17 +17,6 @@
 </script>
 
 <style scoped>
-    .already {
-        background-image: url("../../assets/tip_block.png");
-        background-repeat: no-repeat;
-        background-size: cover;
-        /*width: 15rem;*/
-        /*height: 7rem;*/
-        display: flex;
-        justify-content: center;
-        flex-direction: column;
-        align-items: center;
-    }
     .title {
         font-size: 2rem;
         font-weight: bold;

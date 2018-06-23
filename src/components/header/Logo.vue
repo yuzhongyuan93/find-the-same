@@ -1,5 +1,5 @@
 <template>
-    <section class="logo">
+    <section class="head-bg">
         <p class="title">HearthStone</p>
         <p class="title">Check<img class="refresh" src="../../assets/refresh.png" @click="$emit('refresh')"/></p>
     </section>
@@ -18,17 +18,6 @@
 </script>
 
 <style scoped>
-    .logo {
-        background-image: url("../../assets/tip_block.png");
-        background-repeat: no-repeat;
-        background-size: cover;
-        /*width: 15rem;*/
-        /*height: 7rem;*/
-        display: flex;
-        justify-content: center;
-        flex-direction: column;
-        align-items: center;
-    }
     .title {
         font-size: 2rem;
         font-weight: bold;
@@ -39,5 +28,6 @@
         vertical-align: -10%;
         margin-left: 10px;
         cursor: pointer;
+        width: 2rem;
     }
 </style>

@@ -55,12 +55,13 @@
         /*border: 1px solid blue;*/
         width: 100%;
         display: flex;
-        flex: 4 1 70%;
+        flex: 3 1 60%;
         flex-direction: column;
     }
     .card-row {
         display: flex;
         flex: 1 1 auto;
         justify-content: space-around;
+        padding: 2px;
     }
 </style>

@@ -31,7 +31,7 @@
             }
         },
         methods:{
-            rotateCard(){//卡片反转
+            rotateCard(){//
                 let backImg = event.target;
                 let frontImg = backImg.parentNode.getElementsByClassName('card-front')[0];
                 //如果是背面则翻到正面
@@ -55,17 +55,20 @@
         position: relative;
     }
     .card-front {
-        width: 77%;
+        max-width: 110%;
+        max-height: 110%;
         transform: rotateY(180deg);
     }
     .card-back {
-        width: 69%;
+        max-width: 95%;
+        max-height: 100%;
         cursor: pointer;
         transform: rotateY(0deg);
     }
     .card-back, .card-front{
         position: absolute;
         backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
         transition: transform 1s;
     }
     .clear-fix {

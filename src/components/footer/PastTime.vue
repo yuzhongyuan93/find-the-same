@@ -1,5 +1,5 @@
 <template>
-    <section class="past">
+    <section class="foot-bg">
         <p class="title">Past Time</p>
         <p class="content">{{ past }}</p>
     </section>
@@ -17,17 +17,6 @@
 </script>
 
 <style scoped>
-    .past {
-        background-image: url("../../assets/tip_block.png");
-        background-repeat: no-repeat;
-        background-size: cover;
-        width: 22rem;
-        height: 7rem;
-        display: flex;
-        justify-content: center;
-        flex-direction: column;
-        align-items: center;
-    }
     .title {
         font-size: 2rem;
         font-weight: bold;

@@ -20,11 +20,13 @@
                 time:{
                     highest:0,//最快时间
                     past:0,//本局已花费时间
+                    startTime:false,//是否已经开始计时
                 },
                 cards:{
                     flippedCards:[],//已经被翻开（但未配对）的牌
                     pairedCards:[],//已经翻开（并且已经配对）的牌
-                }
+                },
+                flippingCard:{},//当前正被点击的卡牌
             }
         },
         computed:{
@@ -33,9 +35,12 @@
             }
         },
         watch:{
-            restPairs:function (data) {
+            restPairs:function (data) {//监听游戏结束的时刻
                 if( data === 0 ){
                     this.time.highest = this.time.past;
+                    setTimeout(()=>{
+                        alert('恭喜您完成挑战！尝试去刷新自己的纪录吧！');
+                    },1000);
                 }
             }
         },
@@ -44,8 +49,39 @@
                 const _this = this;
                 let flipped = this.cards.flippedCards;
                 let card = event.target.parentNode;
-                //开始计时
-                if( this.time.past === 0 ){
+                //防止连续点击
+                if( this.flippingCard !== card ){
+                    //更新当前卡牌值
+                    this.flippingCard = card;
+                    //开始计时
+                    this.setTime();
+                    //如果已经翻开未配对的为0张
+                    if( flipped.length == 0 ){
+                        flipped.push(card);
+                    }
+                    //如果已经翻开未配对的为1张
+                    else if( flipped.length == 1 ){
+                        let last = flipped[0];
+                        //如果之前翻开的和刚翻开的不一致，则都翻回去
+                        if( last.getAttribute('data-id') !== card.getAttribute('data-id') ){
+                            this.cards.flippedCards = [];
+                            setTimeout(()=>{
+                                _this.flipToFront(last);
+                                _this.flipToFront(card);
+                            },1000);
+                        }
+                        //如果之前的和刚翻开的一致，则保留
+                        else if( last.getAttribute('data-id') === card.getAttribute('data-id') ){
+                            this.cards.pairedCards.push(last,card);
+                            this.cards.flippedCards = [];
+                        }
+                    }
+                }
+            },
+            setTime(){//开始计时
+                const _this = this;
+                if( !this.time.startTime ){
+                    this.time.startTime = true;
                     let inter = setInterval(()=>{
                         if( _this.restPairs !== 0 ){
                             _this.time.past++;
@@ -55,28 +91,6 @@
                         }
                     },1000);
                 }
-                //如果已经翻开未配对的为0张
-                if( flipped.length == 0 ){
-                    flipped.push(card);
-                }
-                //如果已经翻开未配对的为1张
-                else if( flipped.length == 1 ){
-                    let last = flipped[0];
-                    //如果之前翻开的和刚翻开的不一致，则都翻回去
-                    if( last.getAttribute('data-id') !== card.getAttribute('data-id') ){
-                        this.cards.flippedCards = [];
-                        setTimeout(()=>{
-                            _this.flipToFront(last);
-                            _this.flipToFront(card);
-                        },1000);
-                    }
-                    //如果之前的和刚翻开的一致，则保留
-                    else if( last.getAttribute('data-id') === card.getAttribute('data-id') ){
-                        this.cards.pairedCards.push(last,card);
-                        this.cards.flippedCards = [];
-                    }
-                }
-                console.log(this.getCardIds(this.cards.flippedCards),this.getCardIds(this.cards.pairedCards))
             },
             getCardIds(arr){
                 var a = []
@@ -105,7 +119,7 @@
         justify-content: center;
         align-items: center;
         flex-direction: column;
-        width: 50rem;
+        width: 60rem;
         height: 100%;
     }
 </style>

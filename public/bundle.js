@@ -63,7 +63,7 @@
 /******/ 	}
 /******/
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "05aa6566ed59db4150b2"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "fd356d23b7d2f025cb64"; // eslint-disable-line no-unused-vars
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule; // eslint-disable-line no-unused-vars
@@ -861,12 +861,14 @@ exports.default = {
             total: _game2.default.row * _game2.default.col, //总数
             time: {
                 highest: 0, //最快时间
-                past: 0 //本局已花费时间
+                past: 0, //本局已花费时间
+                startTime: false //是否已经开始计时
             },
             cards: {
                 flippedCards: [], //已经被翻开（但未配对）的牌
                 pairedCards: [] //已经翻开（并且已经配对）的牌
-            }
+            },
+            flippingCard: {} //当前正被点击的卡牌
         };
     },
 
@@ -878,8 +880,12 @@ exports.default = {
     },
     watch: {
         restPairs: function restPairs(data) {
+            //监听游戏结束的时刻
             if (data === 0) {
                 this.time.highest = this.time.past;
+                setTimeout(function () {
+                    alert('恭喜您完成挑战！尝试去刷新自己的纪录吧！');
+                }, 1000);
             }
         }
     },
@@ -889,8 +895,40 @@ exports.default = {
             var _this = this;
             var flipped = this.cards.flippedCards;
             var card = event.target.parentNode;
+            //防止连续点击
+            if (this.flippingCard !== card) {
+                //更新当前卡牌值
+                this.flippingCard = card;
+                //开始计时
+                this.setTime();
+                //如果已经翻开未配对的为0张
+                if (flipped.length == 0) {
+                    flipped.push(card);
+                }
+                //如果已经翻开未配对的为1张
+                else if (flipped.length == 1) {
+                        var last = flipped[0];
+                        //如果之前翻开的和刚翻开的不一致，则都翻回去
+                        if (last.getAttribute('data-id') !== card.getAttribute('data-id')) {
+                            this.cards.flippedCards = [];
+                            setTimeout(function () {
+                                _this.flipToFront(last);
+                                _this.flipToFront(card);
+                            }, 1000);
+                        }
+                        //如果之前的和刚翻开的一致，则保留
+                        else if (last.getAttribute('data-id') === card.getAttribute('data-id')) {
+                                this.cards.pairedCards.push(last, card);
+                                this.cards.flippedCards = [];
+                            }
+                    }
+            }
+        },
+        setTime: function setTime() {
             //开始计时
-            if (this.time.past === 0) {
+            var _this = this;
+            if (!this.time.startTime) {
+                this.time.startTime = true;
                 var inter = setInterval(function () {
                     if (_this.restPairs !== 0) {
                         _this.time.past++;
@@ -899,28 +937,6 @@ exports.default = {
                     }
                 }, 1000);
             }
-            //如果已经翻开未配对的为0张
-            if (flipped.length == 0) {
-                flipped.push(card);
-            }
-            //如果已经翻开未配对的为1张
-            else if (flipped.length == 1) {
-                    var last = flipped[0];
-                    //如果之前翻开的和刚翻开的不一致，则都翻回去
-                    if (last.getAttribute('data-id') !== card.getAttribute('data-id')) {
-                        this.cards.flippedCards = [];
-                        setTimeout(function () {
-                            _this.flipToFront(last);
-                            _this.flipToFront(card);
-                        }, 1000);
-                    }
-                    //如果之前的和刚翻开的一致，则保留
-                    else if (last.getAttribute('data-id') === card.getAttribute('data-id')) {
-                            this.cards.pairedCards.push(last, card);
-                            this.cards.flippedCards = [];
-                        }
-                }
-            console.log(this.getCardIds(this.cards.flippedCards), this.getCardIds(this.cards.pairedCards));
         },
         getCardIds: function getCardIds(arr) {
             var a = [];
@@ -1105,7 +1121,7 @@ exports.default = {
     },
     methods: {
         rotateCard: function rotateCard() {
-            //卡片反转
+            //
             var backImg = event.target;
             var frontImg = backImg.parentNode.getElementsByClassName('card-front')[0];
             //如果是背面则翻到正面
@@ -1346,7 +1362,7 @@ exports = module.exports = __webpack_require__(/*! ../node_modules/css-loader/li
 
 
 // module
-exports.push([module.i, "\n.game[data-v-31e028d0] {\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    flex-direction: column;\n    width: 50rem;\n    height: 100%;\n}\n", ""]);
+exports.push([module.i, "\n.game[data-v-31e028d0] {\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    flex-direction: column;\n    width: 60rem;\n    height: 100%;\n}\n", ""]);
 
 // exports
 
@@ -1360,12 +1376,13 @@ exports.push([module.i, "\n.game[data-v-31e028d0] {\n    display: flex;\n    jus
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
+var escape = __webpack_require__(/*! ../../../node_modules/css-loader/lib/url/escape.js */ "./node_modules/css-loader/lib/url/escape.js");
 exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
 // imports
 
 
 // module
-exports.push([module.i, "\n.foot[data-v-51da6067] {\n    /*border: 1px solid yellow;*/\n    display: flex;\n    flex: 1 1 auto;\n    width: 100%;\n    padding: 1rem 0rem;\n    justify-content: space-around;\n    align-items: center;\n}\n", ""]);
+exports.push([module.i, "\n.foot[data-v-51da6067] {\n    display: flex;\n    flex: 1 1 auto;\n    width: 100%;\n    justify-content: space-around;\n    align-items: center;\n}\n.foot-bg[data-v-51da6067] {\n    background-image: url(" + escape(__webpack_require__(/*! ../../assets/tip_block.png */ "./src/assets/tip_block.png")) + ");\n    background-repeat: no-repeat;\n    background-size: cover;\n    display: flex;\n    justify-content: center;\n    flex-direction: column;\n    align-items: center;\n    padding: 2rem 2rem 1rem 2rem;\n    flex: 1 1 50%;\n    margin: 0px 1rem;\n}\n", ""]);
 
 // exports
 
@@ -1379,13 +1396,12 @@ exports.push([module.i, "\n.foot[data-v-51da6067] {\n    /*border: 1px solid yel
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-var escape = __webpack_require__(/*! ../../../node_modules/css-loader/lib/url/escape.js */ "./node_modules/css-loader/lib/url/escape.js");
 exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
 // imports
 
 
 // module
-exports.push([module.i, "\n.highest[data-v-7c86b49a] {\n    background-image: url(" + escape(__webpack_require__(/*! ../../assets/tip_block.png */ "./src/assets/tip_block.png")) + ");\n    background-repeat: no-repeat;\n    background-size: cover;\n    width: 22rem;\n    height: 7rem;\n    display: flex;\n    justify-content: center;\n    flex-direction: column;\n    align-items: center;\n}\n.title[data-v-7c86b49a] {\n    font-size: 2rem;\n    font-weight: bold;\n    color: #795548;\n    align-self: center;\n}\n.content[data-v-7c86b49a] {\n    font-size: 2rem;\n    font-weight: bold;\n    color: #ffffff;\n}\n", ""]);
+exports.push([module.i, "\n.title[data-v-7c86b49a] {\n    font-size: 2rem;\n    font-weight: bold;\n    color: #795548;\n    align-self: center;\n}\n.content[data-v-7c86b49a] {\n    font-size: 2rem;\n    font-weight: bold;\n    color: #ffffff;\n}\n", ""]);
 
 // exports
 
@@ -1399,13 +1415,12 @@ exports.push([module.i, "\n.highest[data-v-7c86b49a] {\n    background-image: ur
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-var escape = __webpack_require__(/*! ../../../node_modules/css-loader/lib/url/escape.js */ "./node_modules/css-loader/lib/url/escape.js");
 exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
 // imports
 
 
 // module
-exports.push([module.i, "\n.past[data-v-72e84780] {\n    background-image: url(" + escape(__webpack_require__(/*! ../../assets/tip_block.png */ "./src/assets/tip_block.png")) + ");\n    background-repeat: no-repeat;\n    background-size: cover;\n    width: 22rem;\n    height: 7rem;\n    display: flex;\n    justify-content: center;\n    flex-direction: column;\n    align-items: center;\n}\n.title[data-v-72e84780] {\n    font-size: 2rem;\n    font-weight: bold;\n    color: #795548;\n    align-self: center;\n}\n.content[data-v-72e84780] {\n    font-size: 2rem;\n    font-weight: bold;\n    color: #ffffff;\n}\n", ""]);
+exports.push([module.i, "\n.title[data-v-72e84780] {\n    font-size: 2rem;\n    font-weight: bold;\n    color: #795548;\n    align-self: center;\n}\n.content[data-v-72e84780] {\n    font-size: 2rem;\n    font-weight: bold;\n    color: #ffffff;\n}\n", ""]);
 
 // exports
 
@@ -1424,7 +1439,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.card[data-v-691238bc] {\n    flex: 1 1 25%;\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    /*padding: 1rem 2rem;*/\n    position: relative;\n}\n.card-front[data-v-691238bc] {\n    width: 77%;\n    transform: rotateY(180deg);\n}\n.card-back[data-v-691238bc] {\n    width: 69%;\n    cursor: pointer;\n    transform: rotateY(0deg);\n}\n.card-back[data-v-691238bc], .card-front[data-v-691238bc]{\n    position: absolute;\n    backface-visibility: hidden;\n    transition: transform 1s;\n}\n.clear-fix[data-v-691238bc] {\n    clear: both;\n}\n", ""]);
+exports.push([module.i, "\n.card[data-v-691238bc] {\n    flex: 1 1 25%;\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    /*padding: 1rem 2rem;*/\n    position: relative;\n}\n.card-front[data-v-691238bc] {\n    max-width: 110%;\n    max-height: 110%;\n    transform: rotateY(180deg);\n}\n.card-back[data-v-691238bc] {\n    max-width: 95%;\n    max-height: 100%;\n    cursor: pointer;\n    transform: rotateY(0deg);\n}\n.card-back[data-v-691238bc], .card-front[data-v-691238bc]{\n    position: absolute;\n    backface-visibility: hidden;\n    -webkit-backface-visibility: hidden;\n    transition: transform 1s;\n}\n.clear-fix[data-v-691238bc] {\n    clear: both;\n}\n", ""]);
 
 // exports
 
@@ -1443,7 +1458,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.card-board[data-v-0b4ae28c] {\n    /*border: 1px solid blue;*/\n    width: 100%;\n    display: flex;\n    flex: 4 1 70%;\n    flex-direction: column;\n}\n.card-row[data-v-0b4ae28c] {\n    display: flex;\n    flex: 1 1 auto;\n    justify-content: space-around;\n}\n", ""]);
+exports.push([module.i, "\n.card-board[data-v-0b4ae28c] {\n    /*border: 1px solid blue;*/\n    width: 100%;\n    display: flex;\n    flex: 3 1 60%;\n    flex-direction: column;\n}\n.card-row[data-v-0b4ae28c] {\n    display: flex;\n    flex: 1 1 auto;\n    justify-content: space-around;\n    padding: 2px;\n}\n", ""]);
 
 // exports
 
@@ -1457,13 +1472,12 @@ exports.push([module.i, "\n.card-board[data-v-0b4ae28c] {\n    /*border: 1px sol
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-var escape = __webpack_require__(/*! ../../../node_modules/css-loader/lib/url/escape.js */ "./node_modules/css-loader/lib/url/escape.js");
 exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
 // imports
 
 
 // module
-exports.push([module.i, "\n.already[data-v-39bb749d] {\n    background-image: url(" + escape(__webpack_require__(/*! ../../assets/tip_block.png */ "./src/assets/tip_block.png")) + ");\n    background-repeat: no-repeat;\n    background-size: cover;\n    /*width: 15rem;*/\n    /*height: 7rem;*/\n    display: flex;\n    justify-content: center;\n    flex-direction: column;\n    align-items: center;\n}\n.title[data-v-39bb749d] {\n    font-size: 2rem;\n    font-weight: bold;\n    color: #795548;\n    align-self: center;\n}\n.content[data-v-39bb749d] {\n    font-size: 2rem;\n    font-weight: bold;\n    color: #ffffff;\n}\n", ""]);
+exports.push([module.i, "\n.title[data-v-39bb749d] {\n    font-size: 2rem;\n    font-weight: bold;\n    color: #795548;\n    align-self: center;\n}\n.content[data-v-39bb749d] {\n    font-size: 2rem;\n    font-weight: bold;\n    color: #ffffff;\n}\n", ""]);
 
 // exports
 
@@ -1477,12 +1491,13 @@ exports.push([module.i, "\n.already[data-v-39bb749d] {\n    background-image: ur
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
+var escape = __webpack_require__(/*! ../../../node_modules/css-loader/lib/url/escape.js */ "./node_modules/css-loader/lib/url/escape.js");
 exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
 // imports
 
 
 // module
-exports.push([module.i, "\n.head[data-v-74dabca7] {\n    /*border: 1px solid red;*/\n    display: flex;\n    flex: 1 1 auto;\n    width: 100%;\n    padding: 1rem 1rem;\n    justify-content: space-around;\n    align-items: center;\n}\n", ""]);
+exports.push([module.i, "\n.head[data-v-74dabca7] {\n    display: flex;\n    flex: 1 1 auto;\n    width: 100%;\n    justify-content: space-around;\n    align-items: center;\n}\n.head-bg[data-v-74dabca7] {\n    background-image: url(" + escape(__webpack_require__(/*! ../../assets/tip_block.png */ "./src/assets/tip_block.png")) + ");\n    background-repeat: no-repeat;\n    background-size: cover;\n    display: flex;\n    justify-content: center;\n    flex-direction: column;\n    align-items: center;\n    padding: 1rem 3rem;\n}\n", ""]);
 
 // exports
 
@@ -1496,13 +1511,12 @@ exports.push([module.i, "\n.head[data-v-74dabca7] {\n    /*border: 1px solid red
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-var escape = __webpack_require__(/*! ../../../node_modules/css-loader/lib/url/escape.js */ "./node_modules/css-loader/lib/url/escape.js");
 exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
 // imports
 
 
 // module
-exports.push([module.i, "\n.logo[data-v-327964fa] {\n    background-image: url(" + escape(__webpack_require__(/*! ../../assets/tip_block.png */ "./src/assets/tip_block.png")) + ");\n    background-repeat: no-repeat;\n    background-size: cover;\n    /*width: 15rem;*/\n    /*height: 7rem;*/\n    display: flex;\n    justify-content: center;\n    flex-direction: column;\n    align-items: center;\n}\n.title[data-v-327964fa] {\n    font-size: 2rem;\n    font-weight: bold;\n    color: #795548;\n    align-self: center;\n}\n.refresh[data-v-327964fa] {\n    vertical-align: -10%;\n    margin-left: 10px;\n    cursor: pointer;\n}\n", ""]);
+exports.push([module.i, "\n.title[data-v-327964fa] {\n    font-size: 2rem;\n    font-weight: bold;\n    color: #795548;\n    align-self: center;\n}\n.refresh[data-v-327964fa] {\n    vertical-align: -10%;\n    margin-left: 10px;\n    cursor: pointer;\n    width: 2rem;\n}\n", ""]);
 
 // exports
 
@@ -1516,13 +1530,12 @@ exports.push([module.i, "\n.logo[data-v-327964fa] {\n    background-image: url("
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-var escape = __webpack_require__(/*! ../../../node_modules/css-loader/lib/url/escape.js */ "./node_modules/css-loader/lib/url/escape.js");
 exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
 // imports
 
 
 // module
-exports.push([module.i, "\n.rest[data-v-44713713] {\n    background-image: url(" + escape(__webpack_require__(/*! ../../assets/tip_block.png */ "./src/assets/tip_block.png")) + ");\n    background-repeat: no-repeat;\n    background-size: cover;\n    /*width: 15rem;*/\n    /*height: 7rem;*/\n    display: flex;\n    justify-content: center;\n    flex-direction: column;\n    align-items: center;\n}\n.title[data-v-44713713] {\n    font-size: 2rem;\n    font-weight: bold;\n    color: #795548;\n    align-self: center;\n}\n.content[data-v-44713713] {\n    font-size: 2rem;\n    font-weight: bold;\n    color: #ffffff;\n}\n", ""]);
+exports.push([module.i, "\n.title[data-v-44713713] {\n    font-size: 2rem;\n    font-weight: bold;\n    color: #795548;\n    align-self: center;\n}\n.content[data-v-44713713] {\n    font-size: 2rem;\n    font-weight: bold;\n    color: #ffffff;\n}\n", ""]);
 
 // exports
 
@@ -1542,7 +1555,7 @@ exports = module.exports = __webpack_require__(/*! ../../node_modules/css-loader
 
 
 // module
-exports.push([module.i, "* {\r\n    box-sizing: border-box;\r\n    padding: 0;\r\n    margin: 0;\r\n}\r\n\r\nhtml, body {\r\n    width: 100%;\r\n    height: 100%;\r\n}\r\n\r\nbody {\r\n    display: flex;\r\n    justify-content: center;\r\n    align-items: center;\r\n    background-image: url(" + escape(__webpack_require__(/*! ../assets/bg.jpg */ "./src/assets/bg.jpg")) + ");\r\n    background-repeat: no-repeat;\r\n    background-size: cover;\r\n}", ""]);
+exports.push([module.i, "* {\r\n    box-sizing: border-box;\r\n    padding: 0;\r\n    margin: 0;\r\n    font-family: Arial;\r\n}\r\n\r\nhtml, body {\r\n    width: 100%;\r\n    height: 100%;\r\n}\r\n\r\nhtml {\r\n    font-size: 10px;\r\n}\r\n\r\nbody {\r\n    display: flex;\r\n    justify-content: center;\r\n    align-items: center;\r\n    background-image: url(" + escape(__webpack_require__(/*! ../assets/bg.jpg */ "./src/assets/bg.jpg")) + ");\r\n    background-repeat: no-repeat;\r\n    background-size: cover;\r\n}\r\n\r\n@media screen and (max-width: 992px) {\r\n    html {\r\n        font-size: 18px;\r\n    }\r\n}", ""]);
 
 // exports
 
@@ -3512,7 +3525,7 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("section", { staticClass: "highest" }, [
+  return _c("section", { staticClass: "foot-bg" }, [
     _c("p", { staticClass: "title" }, [_vm._v("Highest")]),
     _vm._v(" "),
     _c("p", { staticClass: "content" }, [_vm._v(_vm._s(_vm.highest))])
@@ -3540,7 +3553,7 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("section", { staticClass: "past" }, [
+  return _c("section", { staticClass: "foot-bg" }, [
     _c("p", { staticClass: "title" }, [_vm._v("Past Time")]),
     _vm._v(" "),
     _c("p", { staticClass: "content" }, [_vm._v(_vm._s(_vm.past))])
@@ -3710,7 +3723,7 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("section", { staticClass: "already" }, [
+  return _c("section", { staticClass: "head-bg" }, [
     _c("p", { staticClass: "title" }, [_vm._v("Total Pairs")]),
     _vm._v(" "),
     _c("p", { staticClass: "content" }, [_vm._v(_vm._s(_vm.total / 2))])
@@ -3779,7 +3792,7 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("section", { staticClass: "logo" }, [
+  return _c("section", { staticClass: "head-bg" }, [
     _c("p", { staticClass: "title" }, [_vm._v("HearthStone")]),
     _vm._v(" "),
     _c("p", { staticClass: "title" }, [
@@ -3818,7 +3831,7 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("section", { staticClass: "rest" }, [
+  return _c("section", { staticClass: "head-bg" }, [
     _c("p", { staticClass: "title" }, [_vm._v("Rest Pairs")]),
     _vm._v(" "),
     _c("p", { staticClass: "content" }, [_vm._v(_vm._s(_vm.paired))])
@@ -13301,6 +13314,10 @@ var _Game = __webpack_require__(/*! ./Game.vue */ "./src/Game.vue");
 var _Game2 = _interopRequireDefault(_Game);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+window.onerror = function (message, url, line) {
+    alert(message);
+};
 
 new _vue2.default({
     el: "#root",

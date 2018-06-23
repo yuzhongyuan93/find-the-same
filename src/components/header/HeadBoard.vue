@@ -19,12 +19,20 @@
 
 <style scoped>
     .head {
-        /*border: 1px solid red;*/
         display: flex;
         flex: 1 1 auto;
         width: 100%;
-        padding: 1rem 1rem;
         justify-content: space-around;
         align-items: center;
+    }
+    .head-bg {
+        background-image: url("../../assets/tip_block.png");
+        background-repeat: no-repeat;
+        background-size: cover;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem 3rem;
     }
 </style>
