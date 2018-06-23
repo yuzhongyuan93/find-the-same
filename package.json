@@ -4,8 +4,7 @@
   "description": "webpack practice",
   "main": "index.js",
   "dependencies": {
-    "vue": "^2.5.16",
-    "webpack": "^4.1.1"
+    "vue": "^2.5.16"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
@@ -22,8 +21,9 @@
     "style-loader": "^0.20.3",
     "vue-loader": "^15.2.4",
     "vue-template-compiler": "^2.5.16",
-    "webpack": "^4.1.1",
-    "webpack-cli": "^2.0.12"
+    "webpack": "^4.12.0",
+    "webpack-cli": "^2.0.12",
+    "webpack-dev-server": "^3.1.4"
   },
   "scripts": {
     "start": "webpack",

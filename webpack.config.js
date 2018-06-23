@@ -13,7 +13,6 @@ const config = {
         inline: true,
         contentBase: path.resolve(__dirname, 'public'),
         open:true,
-        host:'10.112.4.161',
     },
     mode: 'development',
     module: {
