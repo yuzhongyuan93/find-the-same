@@ -26,7 +26,6 @@
                     flippedCards:[],//已经被翻开（但未配对）的牌
                     pairedCards:[],//已经翻开（并且已经配对）的牌
                 },
-                flippingCard:{},//当前正被点击的卡牌
             }
         },
         computed:{
@@ -49,10 +48,9 @@
                 const _this = this;
                 let flipped = this.cards.flippedCards;
                 let card = event.target.parentNode;
-                //防止连续点击
-                if( this.flippingCard !== card ){
-                    //更新当前卡牌值
-                    this.flippingCard = card;
+                if( card.getAttribute('data-direction') == 'back' ){
+                    //防止翻开前连续点击多次
+                    card.setAttribute('data-direction','front');
                     //开始计时
                     this.setTime();
                     //如果已经翻开未配对的为0张
@@ -68,6 +66,8 @@
                             setTimeout(()=>{
                                 _this.flipToFront(last);
                                 _this.flipToFront(card);
+                                last.setAttribute('data-direction','back');
+                                card.setAttribute('data-direction','back');
                             },1000);
                         }
                         //如果之前的和刚翻开的一致，则保留
@@ -76,6 +76,7 @@
                             this.cards.flippedCards = [];
                         }
                     }
+                    // console.log(this.cards.flippedCards,this.cards.pairedCards)
                 }
             },
             setTime(){//开始计时

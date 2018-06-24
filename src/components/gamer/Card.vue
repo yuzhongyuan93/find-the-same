@@ -1,5 +1,5 @@
 <template>
-    <section class="card" @click="rotateCard()">
+    <section class="card" @click="rotateCard()" data-direction="back">
         <img class="card-back" :src="cardBgImg">
         <img class="card-front" src="../../assets/1.png" v-if="frontIndex===1" />
         <img class="card-front" src="../../assets/2.png" v-if="frontIndex===2" />
