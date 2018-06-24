@@ -63,7 +63,7 @@
 /******/ 	}
 /******/
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "c42a0177423d2c6bd513"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "38ebe1b66a56aacda285"; // eslint-disable-line no-unused-vars
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule; // eslint-disable-line no-unused-vars
@@ -812,6 +812,48 @@ exports.default = {
 
 /***/ }),
 
+/***/ "./config/platform.config.js":
+/*!***********************************!*\
+  !*** ./config/platform.config.js ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+exports.default = function () {
+    //平台、设备和操作系统参数
+    var system = {
+        win: false,
+        mac: false,
+        xll: false,
+        ipad: false,
+        computer: false, //是否是电脑端
+        mobile: false //是否是移动端
+    };
+    //检测平台
+    var p = navigator.platform;
+    system.win = p.indexOf("Win") == 0;
+    system.mac = p.indexOf("Mac") == 0;
+    system.x11 = p == "X11" || p.indexOf("Linux") == 0;
+    system.ipad = navigator.userAgent.match(/iPad/i) != null ? true : false;
+    if (system.win || system.mac || system.xll || system.ipad) {
+        //PC端
+        system.computer = true;
+    } else {
+        //移动端
+        system.mobile = true;
+    }
+    return system;
+};
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/Game.vue?vue&type=script&lang=js":
 /*!********************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib!./node_modules/vue-loader/lib??vue-loader-options!./src/Game.vue?vue&type=script&lang=js ***!
@@ -867,8 +909,7 @@ exports.default = {
             cards: {
                 flippedCards: [], //已经被翻开（但未配对）的牌
                 pairedCards: [] //已经翻开（并且已经配对）的牌
-            },
-            flippingCard: {} //当前正被点击的卡牌
+            }
         };
     },
 
@@ -889,16 +930,21 @@ exports.default = {
             }
         }
     },
+    mounted: function mounted() {
+        if (!localStorage.getItem('NotFirstTime_11029375')) {
+            this.showIntro();
+        }
+    },
+
     methods: {
         flippedCard: function flippedCard() {
             //监听到卡牌翻动（背面翻到正面）事件
             var _this = this;
             var flipped = this.cards.flippedCards;
             var card = event.target.parentNode;
-            //防止连续点击
-            if (this.flippingCard !== card) {
-                //更新当前卡牌值
-                this.flippingCard = card;
+            if (card.getAttribute('data-direction') == 'back') {
+                //防止翻开前连续点击多次
+                card.setAttribute('data-direction', 'front');
                 //开始计时
                 this.setTime();
                 //如果已经翻开未配对的为0张
@@ -914,6 +960,8 @@ exports.default = {
                             setTimeout(function () {
                                 _this.flipToFront(last);
                                 _this.flipToFront(card);
+                                last.setAttribute('data-direction', 'back');
+                                card.setAttribute('data-direction', 'back');
                             }, 1000);
                         }
                         //如果之前的和刚翻开的一致，则保留
@@ -922,6 +970,7 @@ exports.default = {
                                 this.cards.flippedCards = [];
                             }
                     }
+                // console.log(this.cards.flippedCards,this.cards.pairedCards)
             }
         },
         setTime: function setTime() {
@@ -953,7 +1002,12 @@ exports.default = {
             frontImg.style.transform = "rotateY(180deg)";
         },
         refresh: function refresh() {
+            //重新开局
             window.location.reload();
+        },
+        showIntro: function showIntro() {
+            //第一次进入游戏弹出说明
+            localStorage.setItem('NotFirstTime_11029375', true);
         }
     },
     components: { HeadBoard: _HeadBoard2.default, CardBoard: _CardBoard2.default, FootBoard: _FootBoard2.default }
@@ -1077,6 +1131,10 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _platform = __webpack_require__(/*! ../../../config/platform.config */ "./config/platform.config.js");
+
+var _platform2 = _interopRequireDefault(_platform);
+
 var _back = __webpack_require__(/*! ../../assets/back1.jpg */ "./src/assets/back1.jpg");
 
 var _back2 = _interopRequireDefault(_back);
@@ -1087,29 +1145,15 @@ var _back4 = _interopRequireDefault(_back3);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
+//平台参数
 exports.default = {
     name: "card",
     props: ['backIndex', 'frontIndex'],
     data: function data() {
         return {
             cardBacks: [_back2.default, _back4.default],
-            direction: 0 //0背面，1正面
+            direction: 0, //0背面，1正面
+            device: (0, _platform2.default)().computer ? 'computer' : 'mobile' //标志当前平台是pc还是移动端
         };
     },
 
@@ -1120,19 +1164,44 @@ exports.default = {
         }
     },
     methods: {
-        rotateCard: function rotateCard() {
-            //
-            var backImg = event.target;
-            var frontImg = backImg.parentNode.getElementsByClassName('card-front')[0];
-            //如果是背面则翻到正面
-            if (backImg.className.includes('card-back')) {
-                backImg.style.transform = "rotateY(180deg)";
-                frontImg.style.transform = "rotateY(0deg)";
-                this.$emit('flip');
+        rotateCard: function rotateCard(platform) {
+            //卡牌翻转，传递事件给外层组件
+            if (platform === 'computer') {
+                var backImg = event.target;
+                var frontImg = backImg.parentNode.getElementsByClassName('card-front')[0];
+                //如果是背面则翻到正面
+                if (backImg.className.includes('card-back')) {
+                    backImg.style.transform = "rotateY(180deg)";
+                    frontImg.style.transform = "rotateY(0deg)";
+                    this.$emit('flip');
+                }
+            } else if (platform === 'mobile') {
+                var _backImg = event.target;
+                var _frontImg = _backImg.parentNode.getElementsByClassName('card-front')[0];
+                //如果是背面则翻到正面
+                if (_backImg.className.includes('card-back')) {
+                    _backImg.style.transform = "rotateY(180deg)";
+                    _frontImg.style.transform = "rotateY(0deg)";
+                    this.$emit('flip');
+                }
             }
         }
     }
-};
+}; //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /***/ }),
 
@@ -1555,7 +1624,7 @@ exports = module.exports = __webpack_require__(/*! ../../node_modules/css-loader
 
 
 // module
-exports.push([module.i, "* {\r\n    box-sizing: border-box;\r\n    padding: 0;\r\n    margin: 0;\r\n    font-family: Arial;\r\n}\r\n\r\nhtml, body {\r\n    width: 100%;\r\n    height: 100%;\r\n}\r\n\r\nhtml {\r\n    font-size: 10px;\r\n}\r\n\r\nbody {\r\n    display: flex;\r\n    justify-content: center;\r\n    align-items: center;\r\n    background-image: url(" + escape(__webpack_require__(/*! ../assets/bg.jpg */ "./src/assets/bg.jpg")) + ");\r\n    background-repeat: no-repeat;\r\n    background-size: cover;\r\n}\r\n\r\n@media screen and (max-width: 992px) {\r\n    html {\r\n        font-size: 18px;\r\n    }\r\n}", ""]);
+exports.push([module.i, "* {\r\n    box-sizing: border-box;\r\n    padding: 0;\r\n    margin: 0;\r\n    font-family: Arial;\r\n}\r\n\r\nhtml, body {\r\n    width: 100%;\r\n    height: 100%;\r\n}\r\n\r\nhtml {\r\n    font-size: 10px;\r\n}\r\n\r\nbody {\r\n    display: flex;\r\n    justify-content: center;\r\n    align-items: center;\r\n    background-image: url(" + escape(__webpack_require__(/*! ../assets/bg.jpg */ "./src/assets/bg.jpg")) + ");\r\n    background-repeat: no-repeat;\r\n    background-size: cover;\r\n    -webkit-tap-highlight-color: rgba(0,0,0,0);/*解决ios部分浏览器click延时造成的闪烁问题*/\r\n}\r\n\r\n/*适配手机端*/\r\n@media screen and (max-width: 992px) {\r\n    html {\r\n        font-size: 18px;\r\n    }\r\n}", ""]);
 
 // exports
 
@@ -3585,9 +3654,13 @@ var render = function() {
     "section",
     {
       staticClass: "card",
+      attrs: { "data-direction": "back" },
       on: {
         click: function($event) {
-          _vm.rotateCard()
+          _vm.rotateCard(_vm.device)
+        },
+        touchstart: function($event) {
+          _vm.rotateCard(_vm.device)
         }
       }
     },
@@ -12130,7 +12203,7 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__.p + "cd950457fd1dfee11a9b08fd940ddad0.png";
+module.exports = __webpack_require__.p + "images/cd950457fd1dfee11a9b08fd940ddad0.png";
 
 /***/ }),
 
@@ -12141,7 +12214,7 @@ module.exports = __webpack_require__.p + "cd950457fd1dfee11a9b08fd940ddad0.png";
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__.p + "85d2a9c53216181fa1cbd187506ede1b.png";
+module.exports = __webpack_require__.p + "images/85d2a9c53216181fa1cbd187506ede1b.png";
 
 /***/ }),
 
@@ -12152,7 +12225,7 @@ module.exports = __webpack_require__.p + "85d2a9c53216181fa1cbd187506ede1b.png";
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__.p + "74d4ac6097669842bfafa2fcad546947.png";
+module.exports = __webpack_require__.p + "images/74d4ac6097669842bfafa2fcad546947.png";
 
 /***/ }),
 
@@ -12163,7 +12236,7 @@ module.exports = __webpack_require__.p + "74d4ac6097669842bfafa2fcad546947.png";
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__.p + "7eda484d41f1cb32a4099a91ac9c87f3.png";
+module.exports = __webpack_require__.p + "images/7eda484d41f1cb32a4099a91ac9c87f3.png";
 
 /***/ }),
 
@@ -12174,7 +12247,7 @@ module.exports = __webpack_require__.p + "7eda484d41f1cb32a4099a91ac9c87f3.png";
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__.p + "6f10225cde6b10a1f4bc1951018ef257.png";
+module.exports = __webpack_require__.p + "images/6f10225cde6b10a1f4bc1951018ef257.png";
 
 /***/ }),
 
@@ -12185,7 +12258,7 @@ module.exports = __webpack_require__.p + "6f10225cde6b10a1f4bc1951018ef257.png";
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__.p + "2fd572d790e4cd7365f5c6d6d2157b52.png";
+module.exports = __webpack_require__.p + "images/2fd572d790e4cd7365f5c6d6d2157b52.png";
 
 /***/ }),
 
@@ -12196,7 +12269,7 @@ module.exports = __webpack_require__.p + "2fd572d790e4cd7365f5c6d6d2157b52.png";
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__.p + "7713b84d5c03d796060057c4d1e9bdf6.png";
+module.exports = __webpack_require__.p + "images/7713b84d5c03d796060057c4d1e9bdf6.png";
 
 /***/ }),
 
@@ -12207,7 +12280,7 @@ module.exports = __webpack_require__.p + "7713b84d5c03d796060057c4d1e9bdf6.png";
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__.p + "6b12e8caa99812753dea98289517f4ab.png";
+module.exports = __webpack_require__.p + "images/6b12e8caa99812753dea98289517f4ab.png";
 
 /***/ }),
 
@@ -12218,7 +12291,7 @@ module.exports = __webpack_require__.p + "6b12e8caa99812753dea98289517f4ab.png";
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__.p + "12642c0a5cb657c216716c02f6bb050e.jpg";
+module.exports = __webpack_require__.p + "images/12642c0a5cb657c216716c02f6bb050e.jpg";
 
 /***/ }),
 
@@ -12229,7 +12302,7 @@ module.exports = __webpack_require__.p + "12642c0a5cb657c216716c02f6bb050e.jpg";
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__.p + "cc3aea626a438f2f232fe91973ba3a4e.jpg";
+module.exports = __webpack_require__.p + "images/cc3aea626a438f2f232fe91973ba3a4e.jpg";
 
 /***/ }),
 
@@ -12240,7 +12313,7 @@ module.exports = __webpack_require__.p + "cc3aea626a438f2f232fe91973ba3a4e.jpg";
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__.p + "6450ace12982095dbba03df1dd68360b.jpg";
+module.exports = __webpack_require__.p + "images/6450ace12982095dbba03df1dd68360b.jpg";
 
 /***/ }),
 
@@ -12251,7 +12324,7 @@ module.exports = __webpack_require__.p + "6450ace12982095dbba03df1dd68360b.jpg";
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__.p + "fa9e483d34de27639dee5263ea60e0b4.png";
+module.exports = __webpack_require__.p + "images/fa9e483d34de27639dee5263ea60e0b4.png";
 
 /***/ }),
 
@@ -12262,7 +12335,7 @@ module.exports = __webpack_require__.p + "fa9e483d34de27639dee5263ea60e0b4.png";
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__.p + "8e6e2ace36d4baf0d906e35927cdfd73.png";
+module.exports = __webpack_require__.p + "images/8e6e2ace36d4baf0d906e35927cdfd73.png";
 
 /***/ }),
 
@@ -13314,10 +13387,6 @@ var _Game = __webpack_require__(/*! ./Game.vue */ "./src/Game.vue");
 var _Game2 = _interopRequireDefault(_Game);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-window.onerror = function (message, url, line) {
-    alert(message);
-};
 
 new _vue2.default({
     el: "#root",

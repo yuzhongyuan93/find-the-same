@@ -1,5 +1,5 @@
 <template>
-    <section class="card" @click="rotateCard()" data-direction="back">
+    <section class="card" @click="rotateCard(device)" @touchstart="rotateCard(device)" data-direction="back">
         <img class="card-back" :src="cardBgImg">
         <img class="card-front" src="../../assets/1.png" v-if="frontIndex===1" />
         <img class="card-front" src="../../assets/2.png" v-if="frontIndex===2" />
@@ -14,6 +14,7 @@
 </template>
 
 <script>
+    import platformConfig from '../../../config/platform.config';//平台参数
     import cardBack1 from '../../assets/back1.jpg';
     import cardBack2 from '../../assets/back2.jpg';
     export default {
@@ -23,6 +24,7 @@
             return {
                 cardBacks:[cardBack1,cardBack2],
                 direction:0,//0背面，1正面
+                device: platformConfig().computer ? 'computer' : 'mobile',//标志当前平台是pc还是移动端
             }
         },
         computed:{
@@ -31,14 +33,26 @@
             }
         },
         methods:{
-            rotateCard(){//
-                let backImg = event.target;
-                let frontImg = backImg.parentNode.getElementsByClassName('card-front')[0];
-                //如果是背面则翻到正面
-                if( backImg.className.includes('card-back') ){
-                    backImg.style.transform = "rotateY(180deg)";
-                    frontImg.style.transform = "rotateY(0deg)";
-                    this.$emit('flip');
+            rotateCard(platform){//卡牌翻转，传递事件给外层组件
+                if( platform === 'computer' ){
+                    let backImg = event.target;
+                    let frontImg = backImg.parentNode.getElementsByClassName('card-front')[0];
+                    //如果是背面则翻到正面
+                    if( backImg.className.includes('card-back') ){
+                        backImg.style.transform = "rotateY(180deg)";
+                        frontImg.style.transform = "rotateY(0deg)";
+                        this.$emit('flip');
+                    }
+                }
+                else if( platform === 'mobile' ){
+                    let backImg = event.target;
+                    let frontImg = backImg.parentNode.getElementsByClassName('card-front')[0];
+                    //如果是背面则翻到正面
+                    if( backImg.className.includes('card-back') ){
+                        backImg.style.transform = "rotateY(180deg)";
+                        frontImg.style.transform = "rotateY(0deg)";
+                        this.$emit('flip');
+                    }
                 }
             },
         },

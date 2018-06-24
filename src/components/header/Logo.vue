@@ -1,7 +1,10 @@
 <template>
     <section class="head-bg">
         <p class="title">HearthStone</p>
-        <p class="title">Check<img class="refresh" src="../../assets/refresh.png" @click="$emit('refresh')"/></p>
+        <p class="title">
+            <span>Check</span>
+            <img class="refresh" src="../../assets/refresh.png" @click="$emit('refresh')"/>
+        </p>
     </section>
 </template>
 
@@ -23,11 +26,14 @@
         font-weight: bold;
         color: #795548;
         align-self: center;
+        display: flex;
+        align-items: center;
     }
     .refresh {
         vertical-align: -10%;
         margin-left: 10px;
         cursor: pointer;
         width: 2rem;
+        height: 2rem;
     }
 </style>

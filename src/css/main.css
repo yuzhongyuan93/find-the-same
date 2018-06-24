@@ -21,8 +21,10 @@ body {
     background-image: url("../assets/bg.jpg");
     background-repeat: no-repeat;
     background-size: cover;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);/*解决ios部分浏览器click延时造成的闪烁问题*/
 }
 
+/*适配手机端*/
 @media screen and (max-width: 992px) {
     html {
         font-size: 18px;

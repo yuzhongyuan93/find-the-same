@@ -13,6 +13,7 @@ const config = {
         inline: true,
         contentBase: path.resolve(__dirname, 'public'),
         open:true,
+        host:'10.112.4.161'
     },
     mode: 'development',
     module: {
@@ -32,7 +33,12 @@ const config = {
             },
             {
                 test:/\.(png)|(jpg)$/,
-                use:['file-loader']
+                use:{
+                    loader: "file-loader",
+                    options: {
+                        outputPath:'images/',
+                    }
+                }
             }
         ]
     },

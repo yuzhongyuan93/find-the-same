@@ -10,16 +10,30 @@
     import Card from './Card.vue';
     export default {
         name: "cardBoard",
-        props:['row','col'],
-        mounted(){
-            // console.log(this.cardArray)
+        props:['row','col','refresh'],
+        data(){
+            return {
+                cardArray:[],//卡牌id矩阵
+            }
         },
         computed:{
             cardBackIndex(){//随机选择卡背1或2
                 const random = Math.ceil(Math.random()*2);
                 return random-1;
             },
-            cardArray(){//根据行数和列数生成矩阵，每个数字只出现2次
+        },
+        watch:{
+            refresh(data){//监听到重新开局
+                if( data ){
+                    window.location.reload();
+                }
+            }
+        },
+        mounted(){
+            this.getCardArray();
+        },
+        methods:{
+            getCardArray(){//根据行数和列数生成矩阵，每个数字只出现2次
                 const row = this.row;
                 const col = this.col;
                 const kinds = (row*col)/2;
@@ -41,10 +55,8 @@
                     }
                     arr.push(temp);
                 }
-                return arr;
+                this.cardArray = arr;
             },
-        },
-        methods:{
         },
         components:{Card},
     }

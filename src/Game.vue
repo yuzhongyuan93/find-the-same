@@ -1,8 +1,9 @@
 <template>
     <div class="game">
         <HeadBoard :total="total" :paired="restPairs" @refresh="refresh()"></HeadBoard>
-        <CardBoard :row="row" :col="col" @flip="flippedCard"></CardBoard>
+        <CardBoard :row="row" :col="col" :refresh="refreshTrigger" @flip="flippedCard"></CardBoard>
         <FootBoard :time="time"></FootBoard>
+        <IntroBoard v-show="ifShowIntro"></IntroBoard>
     </div>
 </template>
 
@@ -11,6 +12,7 @@
     import HeadBoard from './components/header/HeadBoard.vue';
     import CardBoard from './components/gamer/CardBoard.vue';
     import FootBoard from './components/footer/FootBoard.vue';
+    import IntroBoard from './components/table/intro.vue';
     export default {
         data() {
             return{
@@ -26,6 +28,8 @@
                     flippedCards:[],//已经被翻开（但未配对）的牌
                     pairedCards:[],//已经翻开（并且已经配对）的牌
                 },
+                ifShowIntro:false,//是否显示提示面板
+                refreshTrigger:false,//是否触发重新开局
             }
         },
         computed:{
@@ -34,13 +38,18 @@
             }
         },
         watch:{
-            restPairs:function (data) {//监听游戏结束的时刻
+            restPairs(data){//监听游戏结束的时刻
                 if( data === 0 ){
                     this.time.highest = this.time.past;
                     setTimeout(()=>{
                         alert('恭喜您完成挑战！尝试去刷新自己的纪录吧！');
                     },1000);
                 }
+            }
+        },
+        mounted(){
+            if( !localStorage.getItem('NotFirstTime_11029375') ){
+                this.showIntro();
             }
         },
         methods:{
@@ -93,7 +102,7 @@
                     },1000);
                 }
             },
-            getCardIds(arr){
+            getCardIds(arr){//输出卡片id
                 var a = []
                 for( var i = 0 ; i <arr.length ; i++ ){
                     a.push(arr[i].getAttribute('data-id'))
@@ -106,11 +115,16 @@
                 backImg.style.transform = "rotateY(0deg)";
                 frontImg.style.transform = "rotateY(180deg)";
             },
-            refresh(){
-                window.location.reload()
+            refresh(){//重新开局
+                // window.location.reload();
+                this.refreshTrigger = true;
+            },
+            showIntro(){//第一次进入游戏弹出说明
+                localStorage.setItem('NotFirstTime_11029375',true);
+                this.ifShowIntro = true;
             }
         },
-        components:{HeadBoard,CardBoard,FootBoard},
+        components:{ HeadBoard,CardBoard,FootBoard,IntroBoard },
     }
 </script>
 
@@ -122,5 +136,6 @@
         flex-direction: column;
         width: 60rem;
         height: 100%;
+        position: relative;
     }
 </style>
